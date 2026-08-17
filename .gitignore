@@ -1,0 +1,22 @@
+# ── Secrets: NEVER commit these ──
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Foundry build artifacts ──
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/dry-run/
+
+# ── Node / frontend ──
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── Editor / OS ──
+.DS_Store
+.idea/
+.vscode/
+*.log

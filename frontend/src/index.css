@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* Brand tokens — see brand.md for the full guide */
+@theme {
+  /* Colors */
+  --color-ink: #0a0e1a; /* page background */
+  --color-ink-soft: #111827; /* card background */
+  --color-line: #1f2a44; /* borders */
+  --color-relay: #3b82f6; /* primary */
+  --color-relay-glow: #60a5fa; /* hover / accents */
+  --color-mint: #34d399; /* success */
+  --color-amber: #fbbf24; /* warning / testnet */
+  --color-rose: #fb7185; /* error */
+  --color-fog: #94a3b8; /* secondary text */
+  --color-paper: #f8fafc; /* primary text */
+
+  /* Typography */
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Base styles */
+body {
+  @apply bg-ink text-paper font-sans antialiased;
+}
+
+/* Signature gradient — used only on hero text and primary CTAs (brand.md §2) */
+.gradient-relay {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-relay),
+    var(--color-relay-glow)
+  );
+}
+.gradient-text {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-relay),
+    var(--color-relay-glow)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
