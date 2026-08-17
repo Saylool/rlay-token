@@ -52,7 +52,7 @@ export function FaucetCard({
           : `Unlocks in ${formatCountdown(remaining)}`}
       </button>
 
-      <TxBadge tx={tx} />
+      <TxBadge tx={tx} source="faucet" />
     </div>
   );
 }
