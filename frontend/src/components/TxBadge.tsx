@@ -1,12 +1,13 @@
 import { explorerTx } from "../lib/contract";
-import type { TxStatus } from "../hooks/useToken";
+import type { TxSource, TxStatus } from "../hooks/useToken";
 
 /**
  * Transaction lifecycle badge: signing → pending (amber) → confirmed (mint) / error (rose).
  * Every tx links to BaseScan (UX rule §6.3). aria-live announces changes (§6.8).
+ * Only renders for the card (`source`) that initiated the transaction.
  */
-export function TxBadge({ tx }: { tx: TxStatus }) {
-  if (tx.state === "idle") return null;
+export function TxBadge({ tx, source }: { tx: TxStatus; source: TxSource }) {
+  if (tx.state === "idle" || tx.source !== source) return null;
 
   const styles: Record<string, string> = {
     signing: "text-amber border-amber/40",

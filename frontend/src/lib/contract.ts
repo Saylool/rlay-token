@@ -3,11 +3,11 @@ import { baseSepolia } from "viem/chains";
 
 /**
  * Contract configuration for the RLAY token on Base Sepolia.
- * The address is injected at build time via VITE_RLAY_ADDRESS (see .env.example);
- * it is set after `forge script DeployRlayToken` prints the deployed address.
+ * Defaults to the live deployment; override at build time with
+ * VITE_RLAY_ADDRESS (see .env.example) to point at another deployment.
  */
 export const RLAY_ADDRESS = (import.meta.env.VITE_RLAY_ADDRESS ??
-  "0x0000000000000000000000000000000000000000") as Address;
+  "0xdd5b322b19937e08e2045f59048a09137d4d081d") as Address;
 
 /** Target chain: Base Sepolia testnet (chainId 84532) */
 export const CHAIN = baseSepolia;

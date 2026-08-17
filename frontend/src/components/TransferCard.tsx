@@ -64,7 +64,7 @@ export function TransferCard({
         {busy ? "Sending…" : "Send RLAY"}
       </button>
 
-      <TxBadge tx={tx} />
+      <TxBadge tx={tx} source="transfer" />
     </div>
   );
 }

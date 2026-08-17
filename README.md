@@ -14,6 +14,13 @@ ERC20 token on **Base Sepolia** testnet, with a Foundry contract suite and a Rea
 | Burning | Any holder |
 | Faucet | 100 RLAY per address per 24h |
 
+## Live Deployment
+
+RLAY is deployed on Base Sepolia at
+[`0xdd5b322b19937e08e2045f59048a09137d4d081d`](https://sepolia.basescan.org/address/0xdd5b322b19937e08e2045f59048a09137d4d081d).
+
+The dApp is live at https://rlay-hub.vercel.app (Vercel, `frontend/` project root).
+
 ## Structure
 
 ```

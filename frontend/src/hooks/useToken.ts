@@ -13,13 +13,16 @@ export interface TokenData {
   nextClaimAt: bigint;
 }
 
+/** Which card a transaction belongs to, so badges don't leak across cards */
+export type TxSource = "faucet" | "transfer";
+
 /** Transaction lifecycle for status badges (UX rule §6.3) */
 export type TxStatus =
   | { state: "idle" }
-  | { state: "signing" }
-  | { state: "pending"; hash: string }
-  | { state: "confirmed"; hash: string }
-  | { state: "error"; message: string };
+  | { state: "signing"; source: TxSource }
+  | { state: "pending"; source: TxSource; hash: string }
+  | { state: "confirmed"; source: TxSource; hash: string }
+  | { state: "error"; source: TxSource; message: string };
 
 /** Maps custom contract errors to human-friendly messages (UX rule §6.6) */
 function friendlyError(err: unknown): string {
@@ -48,14 +51,17 @@ export function useToken(wallet: WalletState) {
 
   const { account, walletClient } = wallet;
 
-  // Fetch all displayed state in one multicall-style batch
-  const refresh = useCallback(async () => {
+  // Fetch all displayed state in one multicall-style batch.
+  // `blockNumber` pins reads to a specific block so post-tx refreshes
+  // don't hit a stale node behind the load-balanced public RPC.
+  const refresh = useCallback(async (blockNumber?: bigint) => {
     const read = (functionName: string, args: unknown[] = []) =>
       publicClient.readContract({
         address: RLAY_ADDRESS,
         abi: RLAY_ABI,
         functionName: functionName as never,
         args: args as never,
+        blockNumber,
       });
 
     const zero = "0x0000000000000000000000000000000000000000";
@@ -82,9 +88,10 @@ export function useToken(wallet: WalletState) {
 
   /** Shared write flow: simulate → sign → wait for receipt → refresh */
   const runTx = useCallback(
-    async (functionName: "faucet" | "transfer", args: unknown[] = []) => {
+    async (functionName: TxSource, args: unknown[] = []) => {
       if (!walletClient || !account) return;
-      setTx({ state: "signing" });
+      const source = functionName;
+      setTx({ state: "signing", source });
       try {
         // Simulate first so rule violations surface before the wallet popup
         const { request } = await publicClient.simulateContract({
@@ -95,12 +102,24 @@ export function useToken(wallet: WalletState) {
           account,
         });
         const hash = await walletClient.writeContract(request);
-        setTx({ state: "pending", hash });
-        await publicClient.waitForTransactionReceipt({ hash });
-        setTx({ state: "confirmed", hash });
-        await refresh();
+        setTx({ state: "pending", source, hash });
+        const receipt = await publicClient.waitForTransactionReceipt({ hash });
+        setTx({ state: "confirmed", source, hash });
+        // Read at the receipt's block to guarantee the tx's effects are visible;
+        // retry briefly in case a lagging RPC node hasn't seen that block yet
+        for (let attempt = 0; ; attempt++) {
+          try {
+            await refresh(receipt.blockNumber);
+            break;
+          } catch {
+            // The tx itself confirmed — keep the confirmed badge even if
+            // the refresh keeps failing; stale tiles beat a false error.
+            if (attempt >= 4) break;
+            await new Promise((r) => setTimeout(r, 1500));
+          }
+        }
       } catch (err) {
-        setTx({ state: "error", message: friendlyError(err) });
+        setTx({ state: "error", source, message: friendlyError(err) });
       }
     },
     [walletClient, account, refresh],
